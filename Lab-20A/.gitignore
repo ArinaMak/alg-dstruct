@@ -1,0 +1,15 @@
+/Debug
+/Release
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.suo
+*.db
+*.png
+/.vs
+/packages
+*.config
+.vs
+x64
+Lab-20A*
