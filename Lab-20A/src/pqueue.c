@@ -123,7 +123,6 @@ void PushQueue(Queue_t* queue, int value, int priority)
 
 	}
 }
-
 int PopQueue(Queue_t* queue)
 {
 	if (!queue)
@@ -135,8 +134,6 @@ int PopQueue(Queue_t* queue)
 	queue->start = queue->start->next;
 	return a;
 }
-
-
 void DestroyQueue(Queue_t* queue)
 {
 	List_t* element = queue->start;
