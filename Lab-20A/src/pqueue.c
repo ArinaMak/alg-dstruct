@@ -1,6 +1,9 @@
 #include <stdio.h>
+#define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
+#include <crtdbg.h>
 #include "pqueueinfo.h"
+
 Queue_t* CreateQueue()
 {
 	Queue_t* tmp_queue = (Queue_t*)malloc(sizeof(Queue_t));
@@ -9,11 +12,16 @@ Queue_t* CreateQueue()
 		printf("Memory allocation error\n");
 		exit(1);
 	}
-	List_t* element = (List_t*)malloc(sizeof(List_t));
-	element->data = 0;
-	element->priority = 0;
-	element->next = NULL;
-	tmp_queue->start = element;
+	tmp_queue->start = (List_t*)malloc(sizeof(List_t));
+	if (!tmp_queue->start)
+	{
+		printf("Memory allocation error\n");
+		free(tmp_queue);
+		exit(1);
+	}
+	tmp_queue->start->data = 0;
+	tmp_queue->start->priority = 0;
+	tmp_queue->start->next = NULL;
 	return tmp_queue;
 }
 int IsEmpty(Queue_t* queue)
@@ -28,9 +36,14 @@ int IsEmpty(Queue_t* queue)
 }
 void PushQueue(Queue_t* queue, int value, int priority)
 {
-	if ((!queue) || (!value) || (!priority))
+	if (!queue)
 	{
 		printf("Error queue or value or priority is empty\n");
+		exit(1);
+	}
+	if (priority<=0)
+	{
+		printf("Error, there is no priopity\n");
 		exit(1);
 	}
 	if (queue->start->priority == 0)
@@ -50,9 +63,15 @@ void PushQueue(Queue_t* queue, int value, int priority)
 	element->next = NULL;
 	List_t* tmp_element = (List_t*)malloc(sizeof(List_t));
 	List_t* tmp_element2 = (List_t*)malloc(sizeof(List_t));
-	if ((!tmp_element) || (!tmp_element2))
+	if ((!tmp_element))
 	{
 		printf("Memory allocation error\n");
+		exit(1);
+	}
+	if ((!tmp_element2))
+	{
+		printf("Memory allocation error\n");
+		free(tmp_element);
 		exit(1);
 	}
 	tmp_element = queue->start;
@@ -121,12 +140,15 @@ int PopQueue(Queue_t* queue)
 void DestroyQueue(Queue_t* queue)
 {
 	List_t* element = queue->start;
-	List_t* tmp = NULL;
-	while (tmp != NULL)
+	while (element != NULL)
 	{
-		tmp = element;
-		free(tmp);
+		List_t* tmp = element;
 		element = element->next;
+		free(tmp);
 	}
 	free(queue);
+}
+void MemoryLeaks(void) {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
 }
