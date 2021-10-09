@@ -20,6 +20,7 @@ extern "C" {
 	void DestroyQueue(Queue_t* queue);
 	int IsEmpty(Queue_t* queue);
 	int PopQueue(Queue_t* queue);
+	void MemoryLeaks(void);
 
 #ifdef __cplusplus
 }
