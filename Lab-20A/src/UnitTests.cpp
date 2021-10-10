@@ -187,6 +187,7 @@ TEST(PopQueueTest, Create_Queue_And_Check_Pop) {
 	{
 		printf("Memory allocation error\n");
 		free(queue);
+		free(queue->start);
 		exit(1);
 	}
 	queue->start->next->data = 22;
