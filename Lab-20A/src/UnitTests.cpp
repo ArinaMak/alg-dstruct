@@ -180,12 +180,19 @@ TEST(PopQueueTest, Create_Queue_And_Check_Pop) {
 		free(queue);
 		exit(1);
 	}
-	queue->start->data = 0;
-	queue->start->priority = 0;
-	queue->start->next = NULL;
+	queue->start->data = 11;
+	queue->start->priority = 1;
+	queue->start->next = (List_t*)malloc(sizeof(List_t));
+	if (!queue->start->next)
+	{
+		printf("Memory allocation error\n");
+		free(queue);
+		exit(1);
+	}
+	queue->start->next->data = 22;
+	queue->start->next->priority=2;
+	queue->start->next->next = NULL;
 
-	PushQueue(queue, 22, 2);
-	PushQueue(queue, 11, 1);
 	element = PopQueue(queue);
 	EXPECT_EQ(element, 11);
 	element = PopQueue(queue);
