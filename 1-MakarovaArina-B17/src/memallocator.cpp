@@ -3,7 +3,6 @@ extern "C" {
 #endif
 #include <stdio.h>
 #include<stdlib.h>
-//#include<math.h>
 #include "memallocator.h"
 
 typedef struct descriptor_t descriptor_t;
@@ -145,18 +144,22 @@ void memfree(void* p) {
 			//Минус учтён
 			free_left_tmp->size = free_left_tmp->size + (free_tmp->size - memgetblocksize());
 
-			free_left_tmp->next = free_tmp->next;
-			if (free_tmp->next!=NULL)
+			if (free_left_tmp->next)
 			{
-				free_tmp->next->prev = free_left_tmp;
-				if (free_tmp->next->next)
+				if (free_left_tmp->next->next)
 				{
-					tail = free_tmp->next;
+					free_left_tmp->next->next->prev = free_left_tmp;
+					free_left_tmp->next = free_left_tmp->next->next;
+				}
+				else
+				{
+					tail = free_left_tmp->next;
+					free_left_tmp->next = NULL;
 				}
 			}
 			else
 			{
-				tail = free_tmp;
+				tail = free_left_tmp;
 			}
 			free_tmp = free_left_tmp;
 		}
@@ -164,23 +167,27 @@ void memfree(void* p) {
 		if (free_tmp->next && free_tmp->next->size < 0)
 		{
 			descriptor_t* free_right_tmp = NULL;
+
 			free_right_tmp = free_tmp->next;
 			//Минус учтён
-			free_tmp->size = free_tmp->size + free_tmp->next->size - memgetblocksize();
-			free_tmp->next = free_right_tmp->next;
-			if (free_right_tmp->next == NULL)
+			free_tmp->size = free_tmp->size + (free_tmp->next->size - memgetblocksize());
+			if (free_tmp->next)
 			{
-				tail = free_tmp;
+				if (free_tmp->next->next)
+				{
+					free_tmp->next->next->prev = free_tmp;
+					free_tmp->next = free_tmp->next->next;
+				}
+				else
+				{
+					tail = free_tmp->next;
+					free_tmp->next = NULL;
+				}
 			}
 			else
 			{
-				free_right_tmp->next->prev = free_tmp;
-				if (free_right_tmp->next->next==NULL)
-				{
-					tail = free_right_tmp->next;
-				}	
+				tail = free_tmp;
 			}
-			free_right_tmp = free_tmp;
 		}
 
 	}
@@ -196,10 +203,12 @@ void memdone() {
 		}
 		curr = curr->next;
 	}
-	head = NULL;
+
 	curr = NULL;
+	head = NULL;
 	overall_size = 0;
 }
+
 #ifdef __cplusplus
 }
 #endif
