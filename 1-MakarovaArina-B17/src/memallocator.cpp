@@ -59,11 +59,6 @@ void* memalloc(int size) {
 	{
 		current = tail;
 	}
-	//Если ищем с начала
-	else
-	{
-		current = head;
-	}
 	while (current)
 	{
 		//Если находится свободный блок подходящего размера
@@ -128,7 +123,7 @@ void memfree(void* p) {
 	}
 	descriptor_t* free_tmp = NULL;
 	free_tmp = (descriptor_t*)((char*)p - memgetblocksize());
-	if (!((head <= free_tmp) && (free_tmp <= head + overall_size)))
+	if (!((head <= free_tmp) && (free_tmp < (head + overall_size - memgetblocksize()))))
 	{
 		exit(1);
 	}
@@ -137,15 +132,15 @@ void memfree(void* p) {
 	{
 		free_tmp->size = -free_tmp->size;
 		//Проверка - свободен ли дискриптор слева
-		if (free_tmp->prev && free_tmp->prev->size < 0)
+		if (free_tmp->prev)
 		{
-			descriptor_t* free_left_tmp = NULL;
-			free_left_tmp = free_tmp->prev;
-			//Минус учтён
-			free_left_tmp->size = free_left_tmp->size + (free_tmp->size - memgetblocksize());
-
-			if (free_left_tmp->next)
+			if (free_tmp->prev->size < 0)
 			{
+				descriptor_t* free_left_tmp = NULL;
+				free_left_tmp = free_tmp->prev;
+				//Минус учтён
+				free_left_tmp->size = free_left_tmp->size + (free_tmp->size - memgetblocksize());
+
 				if (free_left_tmp->next->next)
 				{
 					free_left_tmp->next->next->prev = free_left_tmp;
@@ -153,26 +148,33 @@ void memfree(void* p) {
 				}
 				else
 				{
-					tail = free_left_tmp->next;
 					free_left_tmp->next = NULL;
+					tail = free_left_tmp;
 				}
+				free_tmp = free_left_tmp;
+				if (!(free_tmp->prev))
+				{
+					head = free_tmp;
+				}
+				//
+				p = NULL;
 			}
-			else
-			{
-				tail = free_left_tmp;
-			}
-			free_tmp = free_left_tmp;
+		}
+		else
+		{
+			head = free_tmp;
 		}
 		//Проверка - свободен ли дискриптор справа
-		if (free_tmp->next && free_tmp->next->size < 0)
+		if(free_tmp->next)
 		{
-			descriptor_t* free_right_tmp = NULL;
-
-			free_right_tmp = free_tmp->next;
-			//Минус учтён
-			free_tmp->size = free_tmp->size + (free_tmp->next->size - memgetblocksize());
-			if (free_tmp->next)
+			if (free_tmp->next->size < 0)
 			{
+				descriptor_t* free_right_tmp = NULL;
+
+				free_right_tmp = free_tmp->next;
+				//Минус учтён
+				free_tmp->size = free_tmp->size + (free_tmp->next->size - memgetblocksize());
+
 				if (free_tmp->next->next)
 				{
 					free_tmp->next->next->prev = free_tmp;
@@ -180,31 +182,48 @@ void memfree(void* p) {
 				}
 				else
 				{
-					tail = free_tmp->next;
 					free_tmp->next = NULL;
+					tail = free_tmp;
+				}
+				if (free_tmp->prev)
+				{
+					free_tmp->prev->next = free_tmp;
+				}
+				else
+				{
+					head = free_tmp;
 				}
 			}
-			else
+			//
+			if (p)
 			{
-				tail = free_tmp;
+				p = NULL;
 			}
+		}
+		else
+		{
+			tail = free_tmp;
 		}
 
 	}
 }
 
 void memdone() {
-	descriptor_t* curr = head;
-	while (curr)
+	if (head)
 	{
-		if (curr->size > 0)
+		descriptor_t* curr = head;
+		while (curr)
 		{
-			printf("Memory leak");
+			if (curr->size > 0)
+			{
+				printf("Memory leak");
+				break;
+			}
+			curr = curr->next;
 		}
-		curr = curr->next;
-	}
 
-	curr = NULL;
+		curr = NULL;
+	}
 	head = NULL;
 	overall_size = 0;
 }
