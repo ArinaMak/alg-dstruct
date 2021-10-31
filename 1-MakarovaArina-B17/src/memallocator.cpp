@@ -67,10 +67,6 @@ void* memalloc(int size) {
 			first_suitable_ptr = current;
 			entire_size_of_the_first_suitable_free_block = -first_suitable_ptr->size;
 
-			if (first_suitable_ptr->next == NULL)
-			{
-				tail = first_suitable_ptr;
-			}
 			//Если найденый блок помимо введённого размера может вместить и доп.инф.
 			if (entire_size_of_the_first_suitable_free_block - size > memgetblocksize())
 			{
@@ -81,6 +77,10 @@ void* memalloc(int size) {
 				new_ptr->next = first_suitable_ptr->next;
 				// "-" т.к. блок свободен
 				new_ptr->size = -(entire_size_of_the_first_suitable_free_block - size - memgetblocksize());
+				if (first_suitable_ptr->next)
+				{
+					first_suitable_ptr->next->prev = new_ptr;
+				}
 				first_suitable_ptr->next = new_ptr;
 				first_suitable_ptr->size = size;
 
@@ -92,6 +92,10 @@ void* memalloc(int size) {
 			else
 			{
 				first_suitable_ptr->size = -first_suitable_ptr->size;
+				if (first_suitable_ptr->next == NULL)
+				{
+					tail = first_suitable_ptr;
+				}
 			}
 			ptr = (void*)((char*)first_suitable_ptr + memgetblocksize());
 			return ptr;
@@ -156,7 +160,6 @@ void memfree(void* p) {
 				{
 					head = free_tmp;
 				}
-				//
 				p = NULL;
 			}
 		}
@@ -165,7 +168,7 @@ void memfree(void* p) {
 			head = free_tmp;
 		}
 		//Проверка - свободен ли дискриптор справа
-		if(free_tmp->next)
+		if (free_tmp->next)
 		{
 			if (free_tmp->next->size < 0)
 			{
@@ -194,7 +197,6 @@ void memfree(void* p) {
 					head = free_tmp;
 				}
 			}
-			//
 			if (p)
 			{
 				p = NULL;
@@ -230,4 +232,4 @@ void memdone() {
 
 #ifdef __cplusplus
 }
-#endif
+#endif 
