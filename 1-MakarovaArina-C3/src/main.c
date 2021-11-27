@@ -1,5 +1,7 @@
 #include<stdio.h>
 #include <stdlib.h>
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
 #pragma warning(disable: 4996)
 
 typedef struct node_t{
@@ -18,6 +20,12 @@ typedef struct {
 	struct queue_t* next_num_node;
 }queue_t;
 
+void MemoryLeaks(void) {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDOUT);
+}
+
 void FreeList(list_t* list) {
 	node_t* curr_node = list->head;
 	while (curr_node != NULL)
@@ -35,6 +43,14 @@ void FreeQueue(queue_t* queue) {
 		queue = queue->next_num_node;
 		free(curr_num);
 		curr_num = queue;
+	}
+}
+
+void FreeGraph(list_t list[], int number_of_vertices)
+{
+	for (int j = 0; j < number_of_vertices; j++)
+	{
+		FreeList(&list[j]);
 	}
 }
 
@@ -71,24 +87,11 @@ int ReadList(list_t list[], int number_of_vertices)
 					list[num_main_vert].head = (node_t*)malloc(sizeof(node_t));
 					if (!list[num_main_vert].head)
 					{
-						for (int j = 0; j < number_of_vertices; j++)
-						{
-							FreeList(&list[j]);
-						}
+						FreeGraph(list, number_of_vertices);
 						return 0;
 					}
 					list[num_main_vert].head->num_node = num_addi_vert;
 					list[num_main_vert].head->next_node = NULL;
-
-					list[num_main_vert].tail = (node_t*)malloc(sizeof(node_t));
-					if (!list[num_main_vert].tail)
-					{
-						for (int j = 0; j < number_of_vertices; j++)
-						{
-							FreeList(&list[j]);
-						}
-						return 0;
-					}
 					list[num_main_vert].tail = list[num_main_vert].head;
 
 				}
@@ -122,10 +125,7 @@ int ReadList(list_t list[], int number_of_vertices)
 										node_t* new_num_node = (node_t*)malloc(sizeof(node_t));
 										if (!new_num_node)
 										{
-											for (int j = 0; j < number_of_vertices; j++)
-											{
-												FreeList(&list[j]);
-											}
+											FreeGraph(list, number_of_vertices);
 											return 0;
 										}
 										new_num_node->num_node = num_addi_vert;
@@ -139,10 +139,7 @@ int ReadList(list_t list[], int number_of_vertices)
 									tmp_node->next_node = (node_t*)malloc(sizeof(node_t));
 									if (!tmp_node->next_node)
 									{
-										for (int j = 0; j < number_of_vertices; j++)
-										{
-											FreeList(&list[j]);
-										}
+										FreeGraph(list, number_of_vertices);
 										return 0;
 									}
 									tmp_node->next_node->num_node = num_addi_vert;
@@ -264,11 +261,8 @@ int main()
 		free(list);
 		return 0;
 	}
-	for (int j = 0; j < size; j++)
-	{
-		FreeList(&list[j]);
-	}
+	FreeGraph(list, size);
 	free(list);
-
+	MemoryLeaks();
 	return 0;
 }
