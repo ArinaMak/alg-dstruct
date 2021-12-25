@@ -110,7 +110,7 @@ void WriteFile(tree_t* t_main, int k) {
 	}
 	if (reached_k_element == 1)
 	{
-		PrintTree6(t_main->right, k, file);
+		PrintTree6(t_main, k, file);
 	}
 	else
 	{
