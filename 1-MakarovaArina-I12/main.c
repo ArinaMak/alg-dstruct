@@ -319,18 +319,22 @@ void ConnectingLeftAndRightChildren3(btree_t** tree_ptr, int index)
 		}
 		tree->quantitykeys--;
 		free(right);
+		tree->children[j + 1] = NULL;
 
-		if (tree->quantitykeys == 0)
+		if (tree_ptr == head_btree_ptr)
 		{
-			tree->quantitykeys = left->quantitykeys;
-			int k = 0;
-			for (k = 0; k < left->quantitykeys; k++)
+			if (tree->quantitykeys == 0)
 			{
-				tree->keys[k] = left->keys[k];
+				tree->quantitykeys = left->quantitykeys;
+				int k = 0;
+				for (k = 0; k < left->quantitykeys; k++)
+				{
+					tree->keys[k] = left->keys[k];
+					tree->children[k] = left->children[k];
+				}
 				tree->children[k] = left->children[k];
+				free(left);
 			}
-			tree->children[k] = left->children[k];
-			free(left);
 		}
 	}
 }
@@ -391,23 +395,36 @@ void DeleteFromList3(btree_t** tree_ptr, int value)
 				}
 				else
 				{
+					if ((*head_btree_ptr) == tree_tmp)
+					{
+						if (tree_tmp->quantitykeys == 0)
+						{
+							free(tree_tmp);
+							(*tree_ptr) = NULL;
+						}
+					}
+					else RightRotate(&tree, index_child - 1);
+					/*
 					if (tree_tmp->quantitykeys == 0)
 					{
 						free(tree_tmp);
 						(*tree_ptr) = NULL;
 					}
 					else RightRotate(&tree, index_child - 1);
+					*/
 				}
 			}
 		}
 		else
 		{
-			if (tree_tmp->quantitykeys == 0)
+			if ((*head_btree_ptr) == tree_tmp)
 			{
-				free(tree_tmp);
-				(*tree_ptr) = NULL;
+				if (tree_tmp->quantitykeys == 0)
+				{
+					free(tree_tmp);
+					(*tree_ptr) = NULL;
+				}
 			}
-
 		}
 
 	}
