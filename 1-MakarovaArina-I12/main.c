@@ -4,7 +4,7 @@
 #include <stdlib.h>
 //#define _CRTDBG_MAP_ALLOC
 //#include <crtdbg.h>
-#define t 2
+#define t 4
 
 #define maxindexkey 2*t-2
 #define maxquantitykeys 2*t-1
@@ -232,6 +232,7 @@ void LeftRotate(btree_t** tree_ptr, int index)
 	}
 	right->keys[i] = 0;
 	right->children[i] = right->children[i + 1];
+	right->children[i + 1] = NULL;
 	right->quantitykeys--;
 }
 void RightRotate(btree_t** tree_ptr, int index)
@@ -247,7 +248,8 @@ void RightRotate(btree_t** tree_ptr, int index)
 		right->children[i] = right->children[i - 1];
 	}
 	right->keys[0] = (*tree_ptr)->keys[index];
-	right->children[0] = left->children[left->quantitykeys + 1];
+	right->children[0] = left->children[left->quantitykeys];
+	left->children[left->quantitykeys] = NULL;
 	right->quantitykeys++;
 	(*tree_ptr)->keys[index] = left->keys[left->quantitykeys - 1];
 	left->quantitykeys--;
@@ -404,14 +406,6 @@ void DeleteFromList3(btree_t** tree_ptr, int value)
 						}
 					}
 					else RightRotate(&tree, index_child - 1);
-					/*
-					if (tree_tmp->quantitykeys == 0)
-					{
-						free(tree_tmp);
-						(*tree_ptr) = NULL;
-					}
-					else RightRotate(&tree, index_child - 1);
-					*/
 				}
 			}
 		}
