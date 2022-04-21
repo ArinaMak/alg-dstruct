@@ -56,8 +56,12 @@ btree_t* CreateTree()
 	btree_t* tree = (btree_t*)(malloc(sizeof(btree_t)));
 	if (!tree) return NULL;
 	tree->quantitykeys = 0;
-	for (int i = 0; i < 2 * t - 1; i++)
+	for (int i = 0; i < maxquantitykeys; i++)
+	{
+		tree->keys[i] = 0;
 		tree->children[i] = NULL;
+	}
+	tree->children[maxindexchild] = NULL;
 	return tree;
 }
 btree_t** head_btree_ptr = NULL;
@@ -217,7 +221,7 @@ void AddingValue1(btree_t** tree_ptr, int value)
 }
 void LeftRotate(btree_t** tree_ptr, int index)
 {
-	//delete from the left node
+	//starts after deleting the element on the left
 	btree_t* left = (*tree_ptr)->children[index];
 	btree_t* right = (*tree_ptr)->children[index + 1];
 	left->keys[left->quantitykeys] = (*tree_ptr)->keys[index];
@@ -237,7 +241,7 @@ void LeftRotate(btree_t** tree_ptr, int index)
 }
 void RightRotate(btree_t** tree_ptr, int index)
 {
-	//delete from the right node
+	//starts after deleting the element on the right
 	btree_t* left = (*tree_ptr)->children[index];
 	btree_t* right = (*tree_ptr)->children[index + 1];
 	int i = 0;
@@ -374,6 +378,7 @@ void DeleteFromList3(btree_t** tree_ptr, int value)
 			{
 				tree_tmp->keys[i] = tree_tmp->keys[i + 1];
 			}
+			tree_tmp->keys[tree_tmp->quantitykeys - 1] = 0;
 			tree_tmp->quantitykeys--;
 		}
 	}
