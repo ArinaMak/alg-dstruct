@@ -104,7 +104,6 @@ int MainInput(FILE* in, FILE* out)
 	char buf[16] = { 0 };
 	char c = 0;
 	char str[10000] = { 0 };
-	int index = -1;
 	while (fgets(buf, 16, in)) {
 		sscanf(buf, "%c %s", &c, &str);
 		switch (c) {
